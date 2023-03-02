@@ -19,6 +19,13 @@ Start:		mov bx, 0b800h 			    ; ES = VideoSeg
 Next:       in  al, 60h
             mov es:[bx], ax
 
+            add bx, 2
+            and bx, 4095d
+
+            xor cx, cx
+Delay:      dec cx
+            loop Delay
+
             cmp al, 1
             jne Next
 
@@ -26,12 +33,15 @@ Next:       in  al, 60h
 
 ;------------------------------------------------
 
+
+
+
 CmdData	db	20 dup (0)		; Cmd line data
 
-; include 	SCR_HNDL.ASM 	; Clear screen function
+include 	SCR_HNDL.ASM 	; Clear screen function
 ; include 	CMD_HNDL.ASM 	; CMD line handler
-; include 	STR_HNDL.ASM 	; Str handler
-; include 	NUM_CNVR.ASM 	; Print AX in BIN/DEC/HEX	
+include 	STR_HNDL.ASM 	; Str handler
+include 	REG_PRNT.ASM 	; Print AX in BIN/DEC/HEX	
 
 end			Start
 
