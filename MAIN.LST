@@ -1,0 +1,100 @@
+Turbo Assembler	 Version 4.1	    03/02/23 13:32:27	    Page 1
+main.asm
+
+
+
+      1
+      2				     .186
+      3	0000			     .model tiny
+      4	0000			     .code
+      5				     org 100h
+      6
+      7				     locals __
+      8
+      9				     include	     TOOLS.ASM					 ; Exit
+1    10
+1    11				     ;------------------------------------------------
+1    12				     ;	     EXIT PROGRAM
+1    13				     ;------------------------------------------------
+1    14				     ; Entry:	     NONE
+1    15				     ; EXIT:	     NONE
+1    16				     ; DESTROYS: AX
+1    17				     ;------------------------------------------------
+1    18
+1    19				     EXIT	     macro
+1    20							     nop
+1    21							     mov ax, 4c00h
+1    22							     int 21h
+1    23							     nop
+1    24							     endm
+1    25
+1    26				     ;------------------------------------------------
+     27
+     28				     ;------------------------------------------------
+     29
+     30	0100  BB B800		     Start:	     mov bx, 0b800h			 ; ES =	VideoSeg
+     31	0103  8E C3					     mov es, bx
+     32
+     33	0105  B4 4E				 mov ah, 4eh		     ; yellow or red
+     34	0107  BB 0370				 mov bx, 160d *	5 + 80d
+     35
+     36	010A  E4 60		     Next:	 in  al, 60h
+     37	010C  26: 89 07				 mov es:[bx], ax
+     38
+     39	010F  3C 01				 cmp al, 1
+     40	0111  75 F7				 jne Next
+     41
+     42							     EXIT
+1    43	0113  90					     nop
+1    44	0114  B8 4C00					     mov ax, 4c00h
+1    45	0117  CD 21					     int 21h
+1    46	0119  90					     nop
+     47
+     48				     ;------------------------------------------------
+     49
+     50	011A  14*(00)		     CmdData db	     20	dup (0)		     ; Cmd line	data
+     51
+     52				     ; include	     SCR_HNDL.ASM    ; Clear screen function
+     53				     ; include	     CMD_HNDL.ASM    ; CMD line	handler
+     54				     ; include	     STR_HNDL.ASM    ; Str handler
+     55				     ; include	     NUM_CNVR.ASM    ; Print AX	in BIN/DEC/HEX
+     56
+     57				     end		     Start
+Turbo Assembler	 Version 4.1	    03/02/23 13:32:27	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/02/23"
+??FILENAME			  Text	 "main	  "
+??TIME				  Text	 "13:32:27"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 DGROUP
+@CODESIZE			  Text	 0
+@CPU				  Text	 0103H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 MAIN
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 1
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+CMDDATA				  Byte	 DGROUP:011A
+NEXT				  Near	 DGROUP:010A
+START				  Near	 DGROUP:0100
+
+Macro Name
+
+EXIT
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0000 Word	  Public  DATA
+  _TEXT				  16  012E Word	  Public  CODE
+
