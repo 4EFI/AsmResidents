@@ -1,40 +1,44 @@
 
-.186
+.286
 .model tiny
 .code 
 org 100h
 
 locals __
 
-include 	TOOLS.ASM 				    ; Exit
+include 	    TOOLS.ASM 				    ; Exit
 
 ;------------------------------------------------
 
-Start:		mov bx, 0b800h 			    ; ES = VideoSeg
-			mov es, bx
+Start:          cli                         ; START NO-INTR
 
-            mov ah, 4eh                 ; yellow or red
-            mov bx, 160d * 5 + 80d      
+                xor bx, bx                  ; ES = 0
+                mov es, bx
 
-Next:       in  al, 60h
-            mov es:[bx], ax
+                mov bx, 4d * 9d             ; BX = 4*9 (9th Intr)
 
-            add bx, 2
-            and bx, 4095d
+                mov ax, es:[bx]             ; Old_09_Ofs = 0:[4*9]
+                mov Old_09_Ofs, ax
 
-            xor cx, cx
-Delay:      dec cx
-            loop Delay
+                mov es:[bx], offset New09   ; 0:[4*9] = New_Intr_Func_Ofs
 
-            cmp al, 1
-            jne Next
+                mov ax, es:[bx + 2]         ; Old_09_Seg = 0:[4*9 + 2]
+                mov Old_09_Seg, ax
 
-			EXIT	
+                mov ax, cs
+                mov es:[bx + 2], ax         ; 0:[4*9 + 2] = New_Intr_Func_Seg
+
+                sti                         ; END NO-INTR
+
+                mov ax, 3100h               ; EXIT with saving
+                mov dx, offset EOP
+                shr dx, 4
+                inc dx
+                int 21h	
 
 ;------------------------------------------------
 
-
-
+include     NEW_RESD.ASM
 
 CmdData	db	20 dup (0)		; Cmd line data
 
@@ -42,6 +46,8 @@ include 	SCR_HNDL.ASM 	; Clear screen function
 ; include 	CMD_HNDL.ASM 	; CMD line handler
 include 	STR_HNDL.ASM 	; Str handler
 include 	REG_PRNT.ASM 	; Print AX in BIN/DEC/HEX	
+
+EOP:
 
 end			Start
 

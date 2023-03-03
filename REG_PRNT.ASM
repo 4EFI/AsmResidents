@@ -70,7 +70,7 @@ PrintBin		proc
 ; DESTROYS:	NONE  
 ;------------------------------------------------
 
-hex_len	= 16d							; len of hex str	
+hex_len	= 4d							; len of hex str	
 
 PrintHex		proc
 				
