@@ -10,12 +10,12 @@ include 	    TOOLS.ASM 				    ; Exit
 
 ;------------------------------------------------
 
-Start:          cli                         ; START NO-INTR
-
-                xor bx, bx                  ; ES = 0
+Start:          xor bx, bx                  ; ES = 0
                 mov es, bx
 
                 mov bx, 4d * 9d             ; BX = 4*9 (9th Intr)
+
+                cli                         ; START NO-INTR
 
                 mov ax, es:[bx]             ; Old_09_Ofs = 0:[4*9]
                 mov Old_09_Ofs, ax
