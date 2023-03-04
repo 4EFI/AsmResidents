@@ -153,6 +153,8 @@ MemSet			proc
 ; ENTRY:	BX = DESTINATION
 ;			CX = SOURCE
 ;			DX = N
+; EXPECTS: 	DS = DESTINATION SEG
+; 			ES = SOURCE 	 SEG
 ; EXIT:		NONE
 ; DESTROYS: NONE
 ;------------------------------------------------
@@ -168,14 +170,14 @@ MemCpy			proc
 				cmp dx, 0		; if( N == 0 )
 				je __End
 
-				__Next:			push dx						; push (3)
-								mov  dl, bp[si]
-								mov  byte ptr bx[si], dl 	; BX[i] = CX[i]
-								pop  dx						; pop  (3)						
+				__Next:			push dx							; push (3)
+								mov  dl, es:bp[si]
+								mov  byte ptr ds:bx[si], dl 	; DS:BX[i] = ES:CX[i]
+								pop  dx							; pop  (3)						
 
-								inc si						; i++
+								inc si							; i++
 
-								cmp si, dx					; if( N == i )
+								cmp si, dx						; if( N == i )
 								je __End
 
 								jmp __Next

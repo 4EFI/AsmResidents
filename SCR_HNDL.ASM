@@ -614,3 +614,109 @@ Input			proc
 				endp
 
 ;------------------------------------------------
+;	COPY SCREEN BOX TO BUFFER 
+;	USE WORD BUFFER WITH WIDTH * HEIGHT SIZE
+;------------------------------------------------
+; ENTRY:	AX = BUFF ADDR
+;			BH = X LEFT CORNER COORDS [0; 79]
+;			BL = Y LEFT CORNER COORDS [0; 24]
+;			CH = WIDTH
+;			CL = HEIGHT
+; EXIT:		NONE
+; EXPECTS:	ES = 0b800h (VIDEO SEGMENT)
+; DESTROYS:	NONE
+;------------------------------------------------
+
+BoxCpy			proc
+
+				push ax bx cx dx di si
+
+				mov  di, ax			; DI = BuffAddr
+				
+				call GetVideoPos
+				mov  si, ax			; SI = ScreenPos
+
+				shl ch, 1			; WIDTH *= 2
+
+				xor dx, dx			; set DX = N for memcpy 
+				mov dl, ch
+
+				mov bx, di			; BX = BuffAddr
+
+				__Next:				push cx
+									mov  cx, si	
+									call memcpy
+									pop  cx	
+
+									dec cl				; HEIGHT--
+
+									cmp cl, 0			; if( HEIGHT == 0 )
+									je __End
+
+									add si, 160d		; ScreenPos += 2*80
+									add bx, dx 			; BuffAddr  += 2*WIDTH 
+
+									jmp __Next	
+				__End:
+
+				pop si di dx cx bx ax
+
+				ret
+				endp
+
+;------------------------------------------------
+;	PASTE BUFFER BOX TO SCREEN
+;	USE WORD BUFFER WITH WIDTH * HEIGHT SIZE
+;------------------------------------------------
+; ENTRY:	AX = BUFF ADDR
+;			BH = X LEFT CORNER COORDS [0; 79]
+;			BL = Y LEFT CORNER COORDS [0; 24]
+;			CH = WIDTH
+;			CL = HEIGHT
+; EXIT:		NONE
+; EXPECTS:	ES = 0b800h (VIDEO SEGMENT)
+; DESTROYS:	NONE
+;------------------------------------------------
+
+BoxPaste		proc
+
+				push ax bx cx dx di si ds es
+
+				mov  di, ax			; DI = BuffAddr
+				
+				call GetVideoPos
+				mov  si, ax			; SI = ScreenPos
+
+				shl ch, 1			; WIDTH *= 2
+
+				xor dx, dx			; set DX = N for memcpy 
+				mov dl, ch
+
+				mov bx, si			; DESTINATION = ScreenPos
+
+				push es ds			; swap( DS, ES )
+				pop  es ds	
+
+				__Next:				push cx
+									mov  cx, di			; SOURCE = BuffAddr
+									call memcpy			
+									pop  cx	
+
+									dec cl				; HEIGHT--
+
+									cmp cl, 0			; if( HEIGHT == 0 )
+									je __End
+
+									
+									add di, dx			; BuffAddr  += 2*WIDTH 
+									add bx, 160d 		; ScreenPos += 2*80
+
+									jmp __Next	
+				__End:
+
+				pop es ds si di dx cx bx ax		
+
+				ret
+				endp
+
+;------------------------------------------------
