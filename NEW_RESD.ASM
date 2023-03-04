@@ -1,6 +1,6 @@
 
 BoxStrRsd       db  0
-BoxDataRsd      db  0, 0, 29d, 6, 31d, 1
+BoxDataRsd      db  0, 0, 29d, 6, 79d, 1
 
 IsPrintReg      db  0
 
@@ -11,7 +11,7 @@ New08           proc
                 push ax bx cx dx 
                 push si ds es 
 
-                push bx
+                push bx                     ; DS = CS
                 mov  bx, cs
                 mov  ds, bx
                 pop  bx
@@ -77,11 +77,15 @@ New09           proc
                 jmp __NoPrintRegs
 
                 __PrintRegs:
+
+                push ds
+
+                push bx                     ; DS = CS
+                mov  bx, cs
+                mov  ds, bx
+                pop  bx
                 
-                push si
-                mov  si, offset IsPrintReg
-                xor  byte ptr cs:[si], 1h
-                pop  si
+                xor  byte ptr IsPrintReg, 1h
 
                 in  al, 61h                 ; Signal keyboard
                 or  al, 80h
@@ -91,6 +95,8 @@ New09           proc
 
                 mov al, 20h                 ; End-of-Intr
                 out 20h, al
+
+                pop ds
 
                 pop ax                      ; load AX
                 iret 
