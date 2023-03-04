@@ -372,7 +372,7 @@ PrintBox		proc
 				push dx					; push (4)
 				push si					; push (5)
 				push di					; push (6)
-				push bp					; push (7)
+				push di					; push (7)
 
 				push ax					; push (8) <> push STR ADDR
 
@@ -380,12 +380,12 @@ PrintBox		proc
 
 				; SET TYPE BOX
 				
-				xor ax, ax				; BP = Type_0 + Type * 9
+				xor ax, ax				; DI = Type_0 + Type * 9
 				mov al, bx[Type_Num]
 				mov cx, 9d				
 				mul cx 
-				mov bp, ax
-				add bp, offset Type_0
+				mov di, ax
+				add di, offset Type_0	
 
 				mov ah, bx[Clr_Num]		; AH = Color
 
@@ -396,18 +396,18 @@ PrintBox		proc
 
 				mov  bh, si[X_Num]		; BH = X
 				mov  bl, si[Y_Num]		; BL = Y
-				mov  al, bp[6]			; AL = horizontal sym
-				mov  dh, bp[0]			; DH = left  top  sym
-				mov  dl, bp[2]			; DL = right top  sym
+				mov  al, di[6]			; AL = horizontal sym
+				mov  dh, di[0]			; DH = left  top  sym
+				mov  dl, di[2]			; DL = right top  sym
 				call PrintHrzLine		
 
 				; PRINT LEFT VERTICAL LINE
 
  				mov  bh, si[X_Num]		; BH = X
 				mov  bl, si[Y_Num]		; BL = Y
-				mov  al, bp[4]			; AL = vertical  sym
-				mov  dh, bp[0]			; DH = left top  sym
-				mov  dl, bp[1]			; DL = left down sym
+				mov  al, di[4]			; AL = vertical  sym
+				mov  dh, di[0]			; DH = left top  sym
+				mov  dl, di[1]			; DL = left down sym
 				call PrintVrtLine		
 
  				push bx					; push (9) <> push (X; Y)
@@ -419,9 +419,9 @@ PrintBox		proc
 				add  dl, cl
 				sub  dl, 1
 				mov  bl, dl				; BL = Y
-				mov  al, bp[7]			; AL = horizontal sym
-				mov  dh, bp[1]			; DH = left  down sym
-				mov  dl, bp[3]			; DL = right down sym
+				mov  al, di[7]			; AL = horizontal sym
+				mov  dh, di[1]			; DH = left  down sym
+				mov  dl, di[3]			; DL = right down sym
 				call PrintHrzLine	
 
 				; PRINT RIGHT VERTICAL LINE
@@ -431,9 +431,9 @@ PrintBox		proc
 				sub  dl, 1  
 				mov  bh, dl				; BH = X
 				mov  bl, si[Y_Num]		; BL = Y
-				mov  al, bp[5]			; AL = vertical   sym
-				mov  dh, bp[2]			; DH = right top  sym
-				mov  dl, bp[3]			; DL = right down sym
+				mov  al, di[5]			; AL = vertical   sym
+				mov  dh, di[2]			; DH = right top  sym
+				mov  dl, di[3]			; DL = right down sym
 				call PrintVrtLine	
 
 				; FILL BOX
@@ -444,7 +444,7 @@ PrintBox		proc
 				add  bh, 1
 				mov  bl, si[Y_Num]		; BL = Y + 1
 				add  bl, 1
-				mov  al, bp[8]			; AL = filling sym
+				mov  al, di[8]			; AL = filling sym
 				sub  ch, 2				; WIDTH  -= 2
 				sub  cl, 2				; HEIGHT -= 2
 				call FillScreen			
@@ -464,21 +464,21 @@ PrintBox		proc
 				mov  dl, si[W_Num]	
 				add  ax, dx
 				xor  dx, dx
-				mov  bp, 2d		
-				div  bp			
+				mov  di, 2d		
+				div  di			
 				mov  bh, si[X_Num]		; X += AL
 				add  bh, al	
 				xor  ax, ax				; AX = HEIGHT / 2 
 				mov  al, si[H_Num]		
 				xor  dx, dx
-				mov  bp, 2d		
-				div  bp	
+				mov  di, 2d		
+				div  di	
 				mov  bl, si[Y_Num]		; Y += AL
 				add  bl, al				
 				mov  ah, si[Clr_Num]	; AH = color
 				call PrintStr		
 
-				pop bp					; pop  (7)
+				pop di					; pop  (7)
 				pop di					; pop  (6)
 				pop si					; pop  (5)
 				pop dx					; pop  (4)

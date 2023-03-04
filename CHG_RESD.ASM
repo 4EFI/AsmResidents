@@ -28,11 +28,7 @@ Start:          xor bx, bx                  ; ES = 0
                 mov ax, cs
                 mov es:[bx + 2], ax         ; 0:[4*8 + 2] = New_Intr_Func_Seg
 
-                sti                         ; END NO-INTR
-
                 mov bx, 4d * 9d             ; BX = 4*9 ( 9th Intr - Keyboard )
-
-                cli                         ; START NO-INTR
 
                 mov ax, es:[bx]             ; Old_09_Ofs = 0:[4*9]
                 mov Old_09_Ofs, ax

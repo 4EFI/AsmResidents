@@ -1,0 +1,89 @@
+Turbo Assembler	 Version 4.1	    03/04/23 17:54:00	    Page 1
+main.asm
+
+
+
+      1
+      2				     .286
+      3	0000			     .model tiny
+      4	0000			     .code
+      5				     org 100h
+      6
+      7				     locals __
+      8
+      9				     include		 ../TOOLS.ASM		     ; Exit
+1    10
+1    11				     ;------------------------------------------------
+1    12				     ;	     EXIT PROGRAM
+1    13				     ;------------------------------------------------
+1    14				     ; Entry:	     NONE
+1    15				     ; EXIT:	     NONE
+1    16				     ; DESTROYS: AX
+1    17				     ;------------------------------------------------
+1    18
+1    19				     EXIT	     macro
+1    20							     nop
+1    21							     mov ax, 4c00h
+1    22							     int 21h
+1    23							     nop
+1    24							     endm
+1    25
+1    26				     ;------------------------------------------------
+     27
+     28				     ;------------------------------------------------
+     29
+     30	0100  B8 1111		     Start:	     mov ax, 1111h
+     31	0103  BB 2222				     mov bx, 2222h
+     32	0106  B9 3333				     mov cx, 3333h
+     33	0109  BA 4444				     mov dx, 4444h
+     34
+     35	010C					     __Next:	 ; push	ax
+     36	010C  E4 60						 in   al, 60h
+     37	010E  3C 01						 cmp  al, 01h
+     38								 ; pop	ax
+     39	0110  75 FA						 jne __Next
+     40
+     41						     EXIT
+1    42	0112  90					     nop
+1    43	0113  B8 4C00					     mov ax, 4c00h
+1    44	0116  CD 21					     int 21h
+1    45	0118  90					     nop
+     46
+     47				     end	     Start
+Turbo Assembler	 Version 4.1	    03/04/23 17:54:00	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "03/04/23"
+??FILENAME			  Text	 "main	  "
+??TIME				  Text	 "17:54:00"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 DGROUP
+@CODESIZE			  Text	 0
+@CPU				  Text	 0707H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 MAIN
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 1
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+START				  Near	 DGROUP:0100
+__NEXT				  Near	 DGROUP:010C
+
+Macro Name
+
+EXIT
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0000 Word	  Public  DATA
+  _TEXT				  16  0119 Word	  Public  CODE
+
