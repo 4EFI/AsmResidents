@@ -1,4 +1,6 @@
 
+;------------------------------------------------
+
 X_Pos = 1           ; Regs X pos    
 
 WidthBox  = 29d
@@ -13,18 +15,17 @@ BoxDataRsd      db  X_Pos - 1, 0, WidthBox, HeightBox, ColorBox, 1
 
 IsPrintReg      db  0
 
+;------------------------------------------------
+
 New08           proc
 
-                push ax bx cx dx 
-                push si ds es 
+                pusha
+                push ds es 
 
                 push cs                             ; DS = CS
                 pop  ds
 
-                mov  bx, 0b800h                     ; ES = VideoSeg
-                mov  es, bx
-
-                cmp byte ptr IsPrintReg, 0
+                cmp byte ptr IsPrintReg, 0          ; if( IsPrintReg == 0 )
                 je __End 
 
                 push bx                             ; save BX
@@ -32,6 +33,37 @@ New08           proc
 
                 mov  bx, 0b800h                     ; ES = VideoSeg
                 mov  es, bx
+
+                pusha                               ; Compare VideoSeg Box with DrawBuff
+                xor  di, di                         ; Buff_i  = 0
+                mov  si, X_Pos - 1                  ; Video_i = X_Pos - 1
+                xor  cx, cx                         ; k = 0
+
+                __Next:             mov dx, es:[si]                     ; DX = VideoSeg[i] 
+                                    cmp word ptr DrawBuff[di], dx       ; if( ViedeoSeg[i] == DrawBuff[i] )
+                                    je __Equal
+
+                                    mov word ptr SaveBuff[di], dx       ; SaveBuff[i] = ViedeoSeg[i]
+
+                                    __Equal:
+                                    add di, 2                           ; Buff_i  += 2
+                                    add si, 2                           ; Video_i += 2
+                                    add cx, 2                           ; k += 2
+
+                                    cmp cx, 2*WidthBox                  ; if( k == 2*W )
+                                    jne __NotNewLine
+
+                                    add si, 160d                        ; Video_i += ( 2*80 - 2*W ) 
+                                    sub si, 2*WidthBox
+                                    xor cx, cx                          ; k = 0 
+
+                                    __NotNewLine:
+                                    cmp di, 2 * WidthBox * HeightBox    ; if( i == 2*W * H )
+                                    je __EndLoop
+
+                                    jmp __Next
+                __EndLoop:
+                popa
 
                 mov  ax, offset BoxStrRsd
                 mov  bx, offset BoxDataRsd
@@ -63,15 +95,15 @@ New08           proc
                 xor  bx, bx
                 mov  ch, WidthBox
                 mov  cl, HeightBox
-                call BoxCpy
+                call BoxCpy                         ; Screen to DrawBox
 
                 __End:
 
                 mov al, 20h                         ; End-of-Intr
                 out 20h, al
 
-                pop es ds si
-                pop dx cx bx ax  
+                pop es ds
+                popa  
 
                 db 0eah                             ; jmp Old_08_Seg:[Old_08_Ofs]
                 Old_08_Ofs dw 0
@@ -79,6 +111,8 @@ New08           proc
 
                 iret
                 endp
+
+;------------------------------------------------
 
 New09           proc   
 
@@ -96,37 +130,24 @@ New09           proc
                 push cs                             ; DS = CS
                 pop  ds
 
+                cmp  byte ptr IsPrintReg, 0
+                je __NoPaste
+
                 push bx
                 mov  bx, 0b800h                     ; ES = VideoSeg
                 mov  es, bx
                 pop  bx
-
-                cmp  byte ptr IsPrintReg, 0
-                je  __Cpy
-                jne __Paste
-
-                __Cpy:                              ; Cpy screen to SaveBuff
-                push ax bx cx
+                                          
+                push ax bx cx                       
                 mov  ax, offset SaveBuff
                 xor  bx, bx
                 mov  ch, WidthBox
                 mov  cl, HeightBox
-                call BoxCpy
-                pop  cx bx ax
+                call BoxPaste                       ; Paste screen to SaveBuff
+                pop cx bx ax 
 
-                jmp __EndSave
-                
-                __Paste:                            ; Paste screen to SaveBuff
-                push ax bx cx
-                mov  ax, offset SaveBuff
-                xor  bx, bx
-                mov  ch, WidthBox
-                mov  cl, HeightBox
-                call BoxPaste
-                pop  cx bx ax
-
-                __EndSave:
-                xor byte ptr IsPrintReg, 1h
+                __NoPaste:
+                xor byte ptr IsPrintReg, 1h         ; set on/off flag IsPrintReg
 
                 in  al, 61h                         ; Signal keyboard
                 or  al, 80h
@@ -152,3 +173,5 @@ New09           proc
 
                 iret
                 endp
+
+;------------------------------------------------
